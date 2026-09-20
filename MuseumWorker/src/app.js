@@ -5,29 +5,31 @@ const server = require('http').createServer(app);
 const os = require('os');
 
 const MAXTHREADS = process.env.MAXTHREADS || 10;
+const ArchiveManager = require('./cardsManager');
 
 // Express setup
 // --------------------
 var router = express.Router();
+router.get('/', (req, res) => res.send('Museum Worker is running'));
 router.get('/:searchString', startSearch);
 app.use('/', router);
 
 // Here's the core of the poodle
 // --------------------
-/*function startSearch(req, res) {
+function startSearch(req, res) {
     if (!req.params.searchString) return res.send('EMPTY');
     let title = req.params.textTitle.replaceAll('+', ' ').trim();
     let searchTerm = req.params.searchString.replaceAll('+', ' ').trim();
-    let textManager = new TextManager();
+    let archiveManager = new ArchiveManager();
     let textSearcher = new ActiveSearchStrategy();
     console.log('Searching in', title, 'for:', searchTerm);
-    return textManager.connect()
-        .then( () => textManager.startSearch( {searchString: searchTerm, textTitle: title}, MAXTHREADS, textSearcher) )
+    return archiveManager.connect()
+        .then( () => archiveManager.startSearch( {searchString: searchTerm, cardTitle: title}, MAXTHREADS, textSearcher) )
         .then( result => result.flat().map( r => { return { textTitle: title,
                                                             contents: r.replace(/[\n\r]/g, ' ').trim()};}))
         .then( r => { console.log('Number of results:',r.length); return r; })
         .then( cleaned => res.send(cleaned) );
-}*/
+}
 
 // Simple error handling
 // --------------------
