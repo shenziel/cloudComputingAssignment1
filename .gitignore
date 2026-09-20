@@ -1,2 +1,4 @@
 MuseumApp/node_modules/
 MuseumApp/package-lock.json
+MuseumWorker/node_modules/
+MuseumWorker/package-lock.json

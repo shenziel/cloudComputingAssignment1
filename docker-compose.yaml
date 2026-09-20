@@ -1,6 +1,6 @@
 services:
   app:
-    image: museumapp
+    image: ikergarcia2/museumapp:v1.1
     restart: always
     ports:
       - 8080:3000
