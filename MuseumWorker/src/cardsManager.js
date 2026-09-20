@@ -42,11 +42,10 @@ class ArchivesManager {
     }
 
     addArchive(title, description, contents) {
-        content = contents || '';
+        var content = contents || '';
         console.log('Storing archive to database');
-        new Archive({name: title, description: description, imageUrl: content})
-            .save()
-            .catch(err => console.log('Error while inserting test archive:', err.message));
+        return new Archive({name: title, description: description, imageUrl: content})
+            .save();   
     }
 
     _runSearch(job, batch, searchStrategy) {

@@ -4,14 +4,17 @@ const port = 3000;
 const server = require('http').createServer(app);
 const os = require('os');
 
+
 const MAXTHREADS = process.env.MAXTHREADS || 10;
 const ArchiveManager = require('./cardsManager');
+app.use(express.json());
 
 // Express setup
 // --------------------
 var router = express.Router();
 router.get('/', (req, res) => res.send('Museum Worker is running'));
-router.get('/:searchString', startSearch);
+router.post('/addArchive', addArchive);
+router.get('/searchString', startSearch);
 app.use('/', router);
 
 // Here's the core of the poodle
@@ -31,6 +34,17 @@ function startSearch(req, res) {
         .then( cleaned => res.send(cleaned) );
 }
 
+function addArchive(req, res) {
+    const {title, description, contents} = req.body;
+    if (!title) return res.send('EMPTY');
+    let archiveManager = new ArchiveManager();
+    console.log('Adding archive:', title);
+    return archiveManager.connect()
+        .then( () => archiveManager.addArchive(title, description, contents).catch(err => console.log('Error while inserting test archive:', err.message)))
+        .then( () => console.log('Archive added:', title, description, contents))
+        .then( () => res.send('OK') );
+}
+
 // Simple error handling
 // --------------------
 // catch 404 and forward to error handler
@@ -47,7 +61,10 @@ app.use(function(err, req, res, next) {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-    if ('/favicon.ico' != req.url) {        
+    console.log('Error %d, url: %s', err.status, req.url);
+    console.log('Body: %s', JSON.stringify(req.body));
+
+    if ('/favicon.ico' != req.url) {
         let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         console.log('Error %d, remoteAddress: %s', err.status, ip);
         console.log('If running inside Vagrant, this may give some clues to the callers identity:');
