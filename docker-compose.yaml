@@ -8,6 +8,9 @@ services:
       - ./MuseumApp/src:/app/src
   worker:
     image: pedroluis95/cloudcomputing:v1
+    restart: always
+    ports:
+      - 8081:3001
     volumes:
       - ./MuseumWorker/src:/app/src
     environment:
