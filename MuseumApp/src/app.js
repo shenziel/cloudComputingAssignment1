@@ -4,9 +4,9 @@ const port = 3000;
 const path = require('path');
 const server = require('http').createServer(app);
 const ejs = require('ejs');
-const io = require('socket.io')(server);
 const axios = require('axios');
 const urlBackend = 'http://localhost:3001'; // Replace with your backend URL
+const io = require('socket.io')(urlBackend);
 
 const firstCard = [{
     title: "DrCain",
