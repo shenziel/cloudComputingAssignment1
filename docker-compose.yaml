@@ -1,0 +1,8 @@
+services:
+  app:
+    image: museumapp
+    restart: always
+    ports:
+      - 8080:3000
+    volumes:
+      - ./MuseumApp/src:/app/src
