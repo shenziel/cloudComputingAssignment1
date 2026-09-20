@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <title>Reploid Museum</title>
+        <link rel="stylesheet" type="text/css" href="/css/style.css">
+        <dashboard>
+            <button onclick="window.location.href='/'"> 
+                Home Page
+            </button>
+            <button onclick="window.location.href='/specialExhibits'"> 
+                Special Exhibits 
+            </button>
+            <button onclick="window.location.href='/submitExhibit'"> 
+                Submit Exhibit
+            </button>
+        </dashboard>
+    </head>
+    <body>
+        <header>
+            <h1>Reploid Museum</h1>
+        </header>
+        <main>
+            <p>Before reploids were ever conceived, there was a man named Dr. Cain. He was a brilliant scientist,  
+                who on one fated day during a site excavation encountered the remains of Dr Thomas Light's laboratory.
+            inside said laboratory, he discovered 'X' an advanced robot with self consciousness, able to make his own
+            choices. X would serve as the base for what we now know as reploids.</p>
+        </main>
+        <% cards.forEach(card => { %>
+            <li>
+                <h2><%= card.title %></h2>
+                <p><%= card.description %></p>
+                <img src="<%= card.image %>" alt="<%= card.title %>" width="300" height="400">
+            </li>
+        <% }); %>
+    </body>
+</html>

@@ -6,6 +6,12 @@
             <button onclick="window.location.href='/specialExhibits'"> 
                 Special Exhibits 
             </button>
+            <button onclick="window.location.href='/reploidBeginnings'"> 
+                Reploid Beginnings
+            </button>
+            <button onclick="window.location.href='/submitExhibit'"> 
+                Submit Exhibit
+            </button>
         </dashboard>
     </head>
     <body>
@@ -14,7 +20,15 @@
         </header>
         <main>
             <p>Dr Cain, Proudly Welcomes you to the Reploid Museum!!!!</p>
-            <img src="/images/drcain.jpg" alt="Dr Cain" width="300" height="400" >
+            <ul>
+                <% cards.forEach(card => { %>
+                    <li>
+                        <h2><%= card.title %></h2>
+                        <p><%= card.description %></p>
+                        <img src="<%= card.image %>" alt="<%= card.title %>" width="300" height="400">
+                    </li>
+                <% }); %>
+            </ul>
         </main>
     </body>
 </html>

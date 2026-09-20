@@ -8,21 +8,41 @@ const ejs = require('ejs');
 const firstCard = [{
     title: "DrCain",
     description: "The human who created the Reploids",
-    image: "/images/DrCain.jpg",
+    image: "https://static.wikia.nocookie.net/megaman/images/6/61/Drcain.jpg/revision/latest/scale-to-width-down/268?cb=20181209035029",
   }];
 
 const sampleCards = [{
     title: "Capsule",
     description: "The capsule that contained X",
-    image: "/images/MMXCapsule.jpg"
+    image: "https://static.wikia.nocookie.net/megaman/images/4/4c/MMXCapsule.png/revision/latest/scale-to-width-down/153?cb=20181210222749"
   },
   {
-    title: "reploids",
-    description: "The reploids that were created by Dr. Cain",
-    image: "/images/reploid.jpg"
+    title: "Sigma",
+    description: "The leader of the Maverick hunters",
+    image: "https://static.wikia.nocookie.net/megaman/images/e/e2/X4_SigmaGood_%28stitched%29.png/revision/latest/scale-to-width-down/180?cb=20221001170235"
+  },
+  {
+    title: "Thomas Light",
+    description: "The father of Robotics",
+    image: "https://megamanwiki.s3.us-east-va.io.cloud.ovh.us/thumb/c/c9/MHX_-_Dr._Light_Art_1.png/250px-MHX_-_Dr._Light_Art_1.png"
   }
     ];
 
+const sampleCards2 = [{
+    title: "X",
+    description: "The robot that inspired the creation of the reploids",
+    image: "https://static.wikia.nocookie.net/megaman/images/b/bb/MM_X_Titanium-X.png/revision/latest?cb=20130302182543"
+  }];
+
+
+function addCard(title, description, image) {
+    const newCard = {
+        title: title,
+        description: description,
+        image: image
+    };
+    sampleCards.push(newCard);
+}
 
 app.set('view engine', 'ejs');
 
@@ -38,6 +58,20 @@ app.get('/', (req, res) => {
 
 app.get('/specialExhibits', (req, res) => {
     res.render('specialExhibits', { cards: sampleCards });
+});
+
+app.get('/reploidBeginnings', (req, res) => {
+    res.render('reploidBeginnings', { cards: sampleCards2 });
+});
+
+app.get('/submitExhibit', (req, res) => {
+    res.render('submitExhibit');
+});
+
+app.post('/submitExhibit', express.urlencoded({ extended: true }), (req, res) => {
+    const { title, description, image } = req.body;
+    addCard(title, description, image);
+    res.redirect('/specialExhibits');
 });
 
 server.listen(port, () => {

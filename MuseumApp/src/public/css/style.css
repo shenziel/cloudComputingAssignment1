@@ -13,7 +13,7 @@ h1 {
 }
 
 body {
-    background-image: url('../images/museum.jpg');
+    background-image: url('https://offloadmedia.feverup.com/secretatlanta.co/wp-content/uploads/2024/04/23114031/Screenshot-2024-04-23-at-11.05.07-AM-1024x676.jpg');
     background-size: cover;
     background-position: center;
 
@@ -36,8 +36,10 @@ ul {
   display: flex;
   flex-wrap: wrap;
   padding: 0 4px;
+  color: #ffffff;
 }
 
-li {
+li, label {
     margin: 5px;
+    color: #ffffff;
 }
