@@ -1,0 +1,1 @@
+curl -X POST http://localhost:3001/addArchive -H 'Content-Type: application/json' -d '{"title":"Signas","description":"New commander of the Maverick Hunter","content":"https://static.wikia.nocookie.net/megaman/images/e/e9/SignasX8.jpg/revision/latest/scale-to-width-down/268?cb=20100619030246"}'

@@ -4,6 +4,9 @@ const port = 3000;
 const path = require('path');
 const server = require('http').createServer(app);
 const ejs = require('ejs');
+const io = require('socket.io')(server);
+const axios = require('axios');
+const urlBackend = 'http://localhost:3001'; // Replace with your backend URL
 
 const firstCard = [{
     title: "DrCain",
@@ -35,13 +38,27 @@ const sampleCards2 = [{
   }];
 
 
-function addCard(title, description, image) {
+async function addCard(title, description, image) { 
     const newCard = {
         title: title,
         description: description,
         image: image
     };
     sampleCards.push(newCard);
+      let url = image || 'https://static.wikia.nocookie.net/megaman/images/b/bb/MM_X_Titanium-X.png/revision/latest?cb=20130302182543';
+        let cardTitle = title || '';
+        console.log('Adding Text', title);
+         console.log('Fetched text: ', url);
+            return await axios.post(urlBackend + '/addArchive', {
+                title: cardTitle,
+                description: description,
+                content: url
+            })
+            .then( () => socket.emit('archiveAdded', cardTitle) )
+            .then(() => console.log('Archive added.'))
+            .catch( (err) => {
+                console.log('Could not add text. Error', err);
+            });
 }
 
 app.set('view engine', 'ejs');
@@ -77,3 +94,16 @@ app.post('/submitExhibit', express.urlencoded({ extended: true }), (req, res) =>
 server.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);  
 });
+
+io.on('connection', (socket) => {
+    console.log('A user connected',socket.id);
+    socket.emit('message', 'Welcome to the Reploid Museum!');
+    socket.on('addCard', (data) => {
+        console.log('Received new card data:', data);
+        addCard(data.title, data.description, data.image);
+        io.emit('newCard', data);
+    });
+    socket.on('disconnect', () => {
+        console.log('A user disconnected',socket.id);
+    });
+}); 

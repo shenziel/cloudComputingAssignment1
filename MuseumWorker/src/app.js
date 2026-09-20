@@ -1,9 +1,9 @@
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = 3001;
 const server = require('http').createServer(app);
 const os = require('os');
-
+var mongoose = require('mongoose');
 
 const MAXTHREADS = process.env.MAXTHREADS || 10;
 const ArchiveManager = require('./cardsManager');
