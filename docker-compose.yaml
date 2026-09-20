@@ -6,3 +6,23 @@ services:
       - 8080:3000
     volumes:
       - ./MuseumApp/src:/app/src
+  worker:
+    image: pedroluis95/cloudcomputing:v1
+    volumes:
+      - ./MuseumWorker/src:/app/src
+    environment:
+      ARCHIVESTORE_HOST: archivestore
+
+  archivestore:
+    image: mongo
+    restart: always
+    command: --quiet --syslog
+    expose:
+      - "27017"
+    volumes:
+      - archivestore-data:/data/db
+      - mongo-config:/data/configdb
+
+volumes:
+  archivestore-data:
+  mongo-config:
