@@ -2,7 +2,7 @@
   "name": "Reploid Museum",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/shenziel/cloudComputingAssignment1/issues"
   },
-  "homepage": "https://github.com/shenziel/cloudComputingAssignment1#readme"
+  "homepage": "https://github.com/shenziel/cloudComputingAssignment1#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
 }
