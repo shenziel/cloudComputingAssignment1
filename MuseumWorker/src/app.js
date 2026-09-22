@@ -14,6 +14,7 @@ var router = express.Router();
 router.get('/', (req, res) => res.send('Museum Worker is running'));
 router.post('/addArchive', addArchive);
 router.get('/listArchives', listArchives);
+router.get('/listArchives/:title', listArchivesByTitle);
 router.get('/searchString', startSearch);
 app.use('/', router);
 
@@ -49,6 +50,16 @@ function listArchives(req, res) {
     let archiveManager = new ArchiveManager();
     return archiveManager.connect()
         .then( () => archiveManager.listArchives())
+        .then( archives => archives.filter( a => a.name !== 'DrCain' && a.name !== 'X'))
+        .then( archives => res.send(archives) );
+}
+
+function listArchivesByTitle(req, res) {
+    let archiveManager = new ArchiveManager();
+    let title = req.params.title.replaceAll('+', ' ').trim();
+    return archiveManager.connect()
+        .then( () => archiveManager.listArchives())
+        .then( archives => archives.filter( a => a.name === title))
         .then( archives => res.send(archives) );
 }
 
