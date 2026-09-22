@@ -15,7 +15,7 @@ router.get('/', (req, res) => res.send('Museum Worker is running'));
 router.post('/addArchive', addArchive);
 router.get('/listArchives', listArchives);
 router.get('/listArchives/:title', listArchivesByTitle);
-router.get('/searchString', startSearch);
+router.get('/searchArticle/:title', searchArchivesByTitle);
 app.use('/', router);
 
 // Here's the core of the poodle
@@ -60,6 +60,14 @@ function listArchivesByTitle(req, res) {
     return archiveManager.connect()
         .then( () => archiveManager.listArchives())
         .then( archives => archives.filter( a => a.name === title))
+        .then( archives => res.send(archives) );
+}
+
+function searchArchivesByTitle(req, res) {
+    let archiveManager = new ArchiveManager();
+    let title = req.params.title.replaceAll('+', ' ').trim();
+    return archiveManager.connect()
+        .then( () => archiveManager.searchArchivesByTitle(title))
         .then( archives => res.send(archives) );
 }
 
