@@ -37,6 +37,37 @@ const sampleCards2 = [{
     image: "https://static.wikia.nocookie.net/megaman/images/b/bb/MM_X_Titanium-X.png/revision/latest?cb=20130302182543"
   }];
 
+app.set('view engine', 'ejs');
+
+app.set('views',path.join(__dirname, 'views'));
+
+app.use(express.static(path.join(__dirname, "public")));
+
+app.use('/css', express.static(path.join(__dirname, 'public/css')));
+
+app.get('/', (req, res) => {
+    res.render('index', { cards: firstCard });
+});
+
+app.get('/specialExhibits', (req, res) => {
+    return listArchives().then(archives => {
+        res.render('specialExhibits', { archives: archives });
+    });
+});
+
+app.get('/reploidBeginnings', (req, res) => {
+    res.render('reploidBeginnings', { cards: sampleCards2 });
+});
+
+app.get('/submitExhibit', (req, res) => {
+    res.render('submitExhibit');
+});
+
+app.post('/submitExhibit', express.urlencoded({ extended: true }), (req, res) => {
+    const { title, description, image } = req.body;
+    addCard(title, description, image);
+    res.redirect('/specialExhibits');
+});
 
 async function addCard(title, description, image) { 
     const newCard = {
@@ -61,7 +92,7 @@ async function addCard(title, description, image) {
             });
 }
 
-async function listArchives() {
+function listArchives() {
     return axios.get(urlBackend + '/listArchives')
         .then( response => {
             console.log('Archives:', response.data);
@@ -85,38 +116,6 @@ async function listArchives(listArchivesTitle) {
             return [];
         });
 }
-
-app.set('view engine', 'ejs');
-
-app.set('views',path.join(__dirname, 'views'));
-
-app.use(express.static(path.join(__dirname, "public")));
-
-app.use('/css', express.static(path.join(__dirname, 'public/css')));
-
-app.get('/', (req, res) => {
-    res.render('index', { cards: firstCard });
-});
-
-app.get('/specialExhibits', (req, res) => {
-    return listArchives().then(archives => {
-        res.render('specialExhibits', { cards: sampleCards, archives: archives });
-    });
-});
-
-app.get('/reploidBeginnings', (req, res) => {
-    res.render('reploidBeginnings', { cards: sampleCards2 });
-});
-
-app.get('/submitExhibit', (req, res) => {
-    res.render('submitExhibit');
-});
-
-app.post('/submitExhibit', express.urlencoded({ extended: true }), (req, res) => {
-    const { title, description, image } = req.body;
-    addCard(title, description, image);
-    res.redirect('/specialExhibits');
-});
 
 server.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);  
