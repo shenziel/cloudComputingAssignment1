@@ -61,6 +61,31 @@ async function addCard(title, description, image) {
             });
 }
 
+async function listArchives() {
+    return axios.get(urlBackend + '/listArchives')
+        .then( response => {
+            console.log('Archives:', response.data);
+            console.log('urlBackend:', urlBackend);
+            return response.data;
+        })
+        .catch( (err) => {
+            console.log('Could not list archives. Error', err);
+            return [];
+        });
+}
+
+async function listArchives(listArchivesTitle) {
+    return axios.get(urlBackend + '/listArchives/' + listArchivesTitle)
+        .then( response => {
+            console.log('Archives:', response.data);
+            return response.data;
+        })
+        .catch( (err) => {
+            console.log('Could not list archives. Error', err);
+            return [];
+        });
+}
+
 app.set('view engine', 'ejs');
 
 app.set('views',path.join(__dirname, 'views'));
@@ -74,7 +99,9 @@ app.get('/', (req, res) => {
 });
 
 app.get('/specialExhibits', (req, res) => {
-    res.render('specialExhibits', { cards: sampleCards });
+    return listArchives().then(archives => {
+        res.render('specialExhibits', { cards: sampleCards, archives: archives });
+    });
 });
 
 app.get('/reploidBeginnings', (req, res) => {
