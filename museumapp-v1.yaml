@@ -243,6 +243,7 @@ spec:
       containers:
       - name: messagequeue
         image: redis:alpine
+        args: ["redis-server", "--appendonly", "yes"]
         ports:
         - containerPort: 6379
         volumeMounts:
@@ -256,7 +257,5 @@ spec:
         resources:
           requests:
             storage: 10Mi
-  args:
-    - redis-server --appendonly yes
 
 ---
