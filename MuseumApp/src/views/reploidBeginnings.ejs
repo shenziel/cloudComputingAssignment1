@@ -24,11 +24,11 @@
             inside said laboratory, he discovered 'X' an advanced robot with self consciousness, able to make his own
             choices. X would serve as the base for what we now know as reploids.</p>
         </main>
-        <% cards.forEach(card => { %>
+        <% archives.forEach(card => { %>
             <li>
                 <h2><%= card.title %></h2>
                 <p><%= card.description %></p>
-                <img src="<%= card.image %>" alt="<%= card.title %>" width="300" height="400">
+                <img src="<%= card.imageUrl %>" alt="<%= card.title %>" width="300" height="400">
             </li>
         <% }); %>
     </body>
