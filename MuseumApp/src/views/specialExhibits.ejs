@@ -29,9 +29,9 @@
             <ul>
                 <% archives.forEach(card => { %>
                     <li>
-                        <h2><%= card.title %></h2>
+                        <h2><%= card.name %></h2>
                         <p><%= card.description %></p>
-                        <img src="<%= card.imageUrl %>" alt="<%= card.title %>" width="300" height="400">
+                        <img src="<%= card.imageUrl %>" alt="<%= card.name %>" width="300" height="400">
                     </li>
                 <% }) %>
             </ul>

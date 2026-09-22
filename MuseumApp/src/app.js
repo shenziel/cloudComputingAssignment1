@@ -5,7 +5,7 @@ const path = require('path');
 const server = require('http').createServer(app);
 const ejs = require('ejs');
 const axios = require('axios');
-const urlBackend = 'http://worker:3001'; // Replace with your backend URL
+const urlBackend = 'http://museumworker:3001'; 
 const io = require('socket.io')(server);
 
 const firstCard = [{
