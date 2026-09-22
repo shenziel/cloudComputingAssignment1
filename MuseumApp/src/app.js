@@ -8,35 +8,6 @@ const axios = require('axios');
 const urlBackend = 'http://museumworker:3001'; 
 const io = require('socket.io')(server);
 
-const firstCard = [{
-    title: "DrCain",
-    description: "The human who created the Reploids",
-    image: "https://static.wikia.nocookie.net/megaman/images/6/61/Drcain.jpg/revision/latest/scale-to-width-down/268?cb=20181209035029",
-  }];
-
-const sampleCards = [{
-    title: "Capsule",
-    description: "The capsule that contained X",
-    image: "https://static.wikia.nocookie.net/megaman/images/4/4c/MMXCapsule.png/revision/latest/scale-to-width-down/153?cb=20181210222749"
-  },
-  {
-    title: "Sigma",
-    description: "The leader of the Maverick hunters",
-    image: "https://static.wikia.nocookie.net/megaman/images/e/e2/X4_SigmaGood_%28stitched%29.png/revision/latest/scale-to-width-down/180?cb=20221001170235"
-  },
-  {
-    title: "Thomas Light",
-    description: "The father of Robotics",
-    image: "https://megamanwiki.s3.us-east-va.io.cloud.ovh.us/thumb/c/c9/MHX_-_Dr._Light_Art_1.png/250px-MHX_-_Dr._Light_Art_1.png"
-  }
-    ];
-
-const sampleCards2 = [{
-    title: "X",
-    description: "The robot that inspired the creation of the reploids",
-    image: "https://static.wikia.nocookie.net/megaman/images/b/bb/MM_X_Titanium-X.png/revision/latest?cb=20130302182543"
-  }];
-
 app.set('view engine', 'ejs');
 
 app.set('views',path.join(__dirname, 'views'));
@@ -53,6 +24,12 @@ app.get('/', (req, res) => {
 
 app.get('/specialExhibits', (req, res) => {
     return listArchives().then(archives => {
+        res.render('specialExhibits', { archives: archives });
+    });
+});
+
+app.get('/searchSpecialExhibits', (req, res) => {
+    return searchArchives(req.query.search).then(archives => {
         res.render('specialExhibits', { archives: archives });
     });
 });
@@ -117,6 +94,18 @@ function listArchivesTitle(listArchivesTitle) {
         })
         .catch( (err) => {
             console.log('Could not list archives. Error', err);
+            return [];
+        });
+}
+
+function searchArchives(searchString) {
+    return axios.get(urlBackend + '/searchArchive/' + searchString)
+        .then( response => {
+            console.log('Search results:', response.data);
+            return response.data;
+        })
+        .catch( (err) => {
+            console.log('Could not search archives. Error', err);
             return [];
         });
 }
