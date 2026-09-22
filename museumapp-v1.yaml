@@ -170,3 +170,59 @@ data:
       { "name": "X", "description": "The robot that inspired the creation of the reploids", "imageUrl": "https://static.wikia.nocookie.net/megaman/images/b/bb/MM_X_Titanium-X.png/revision/latest?cb=20130302182543"}
     ]);
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: messagequeue
+  labels:
+    app: messagequeue
+spec:
+  selector:
+    app: messagequeue
+  ports:
+  - port: 6379
+    targetPort: 6379
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: messagequeue
+  labels:
+    app: messagequeue
+spec:
+  serviceName: messagequeue
+  replicas: 1
+  selector:
+    matchLabels:
+      app: messagequeue
+  template:
+    metadata:
+      labels:
+        app: messagequeue
+    spec:
+      containers:
+      - name: messagequeue
+        image: redis:alpine
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: messagequeue-data
+          mountPath: /data
+        - name: redis-config
+          mountPath: /usr/local/etc/redis/redis.conf
+  volumeClaimTemplates:
+    - metadata:
+        name: messagequeue-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Mi
+    - metadata:
+        name: redis-config
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests: 
+            storage: 5Mi
+---
