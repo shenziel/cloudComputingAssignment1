@@ -3,7 +3,6 @@ const app = express();
 const port = 3001;
 const server = require('http').createServer(app);
 const os = require('os');
-var mongoose = require('mongoose');
 
 const MAXTHREADS = process.env.MAXTHREADS || 10;
 const ArchiveManager = require('./cardsManager');
@@ -14,6 +13,7 @@ app.use(express.json());
 var router = express.Router();
 router.get('/', (req, res) => res.send('Museum Worker is running'));
 router.post('/addArchive', addArchive);
+router.get('/listArchives', listArchives);
 router.get('/searchString', startSearch);
 app.use('/', router);
 
@@ -43,6 +43,13 @@ function addArchive(req, res) {
         .then( () => archiveManager.addArchive(title, description, contents).catch(err => console.log('Error while inserting test archive:', err.message)))
         .then( () => console.log('Archive added:', title, description, contents))
         .then( () => res.send('OK') );
+}
+
+function listArchives(req, res) {
+    let archiveManager = new ArchiveManager();
+    return archiveManager.connect()
+        .then( () => archiveManager.listArchives())
+        .then( archives => res.send(archives) );
 }
 
 // Simple error handling

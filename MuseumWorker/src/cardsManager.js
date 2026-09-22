@@ -48,6 +48,10 @@ class ArchivesManager {
             .save();   
     }
 
+    listArchives(){
+        return Archive.find({}).select('name description imageUrl -_id').exec();
+    }
+
     _runSearch(job, batch, searchStrategy) {
         return Promise.resolve(batch)
         .then( batch => {
