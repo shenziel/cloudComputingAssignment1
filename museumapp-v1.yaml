@@ -1,0 +1,159 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: museumapp-service
+  labels:
+    app: museumapp
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 3000
+    nodePort: 30001
+    protocol: TCP
+  selector:
+    app: museumapp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: museumapp
+  labels:
+    app: museumapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: museumapp
+  template:
+    metadata:
+      labels:
+        app: museumapp
+    spec:
+      containers:
+      - name: museumapp
+        image: ikergarcia2/museumapp:v1.1
+        ports:
+        - containerPort: 3000
+---
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: museumworker
+  labels:
+    app: museumworker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: museumworker
+  template:
+    metadata:
+      labels:
+        app: museumworker
+    spec:
+      containers:
+      - name: museumworker
+        image: pedroluis95/cloudcomputing:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        env:
+        - name: ARCHIVESTORE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: museumapp-config
+              key: archivestore_host
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: archivestore
+  labels:
+    app: archivestore
+spec:
+  ports:
+  - port: 27017
+    targetPort: mongodb-port
+  selector:
+    app: archivestore
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: archivestore
+  labels:
+    app: archivestore
+spec:
+  serviceName: mongodb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: archivestore
+  template:
+    metadata:
+      labels:
+        app: archivestore
+    spec:
+      containers:
+      - name: archivestore
+        image: mongo
+        ports:
+        - containerPort: 27017
+          name: mongodb-port
+        volumeMounts:
+        - name: archivestore-data
+          mountPath: /data/db
+        - name: mongo-config
+          mountPath: /data/configdb
+        - name: seed
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: seed
+        configMap:
+          name: archivestore-seed
+  volumeClaimTemplates:
+    - metadata:
+        name: archivestore-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests: 
+            storage: 10Mi
+    - metadata:
+        name: mongo-config
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests: 
+            storage: 5Mi          
+---
+# ConfigMap to store ARCHIVESTORE_HOST variable in
+# --------------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: museumapp-config
+  labels:
+    data: config
+data:
+  archivestore_host: "archivestore"
+---
+# ---------- Seed data (runs only when the Mongo volume is empty) ----------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: archivestore-seed
+data:
+  seed.js: |
+    db = db.getSiblingDB("Archives");
+    db.archives.insertMany([
+      {"name": "DrCain", "description": "The human who created the Reploids", "imageUrl": "https://static.wikia.nocookie.net/megaman/images/6/61/Drcain.jpg/revision/latest/scale-to-width-down/268?cb=20181209035029"},
+      { "name": "Capsule", "description": "The capsule that contained X", "imageUrl": "https://static.wikia.nocookie.net/megaman/images/4/4c/MMXCapsule.png/revision/latest/scale-to-width-down/153?cb=20181210222749"},
+      { "name": "Sigma", "description": "The leader of the Maverick hunters", "imageUrl": "https://static.wikia.nocookie.net/megaman/images/e/e2/X4_SigmaGood_%28stitched%29.png/revision/latest/scale-to-width-down/180?cb=20221001170235"},
+      { "name": "Thomas Light", "description": "The father of Robotics", "imageUrl": "https://megamanwiki.s3.us-east-va.io.cloud.ovh.us/thumb/c/c9/MHX_-_Dr._Light_Art_1.png/250px-MHX_-_Dr._Light_Art_1.png"},
+      { "name": "X", "description": "The robot that inspired the creation of the reploids", "imageUrl": "https://static.wikia.nocookie.net/megaman/images/b/bb/MM_X_Titanium-X.png/revision/latest?cb=20130302182543"}
+    ]);
+---
