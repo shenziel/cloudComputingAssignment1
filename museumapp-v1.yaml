@@ -37,6 +37,27 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
+        env:
+        - name: URL_BACKEND
+          valueFrom:
+            configMapKeyRef:
+              name: museumapp-config
+              key: backend_host
+        - name: MESSAGEQUEUE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: museumapp-config
+              key: messagequeue_host
+        - name: MESSAGEQUEUE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: museumapp-config
+              key: messagequeue_port
+        - name: QUEUE_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: museumapp-config
+              key: queue_key
 ---
 apiVersion: v1
 kind: Service
@@ -79,6 +100,21 @@ spec:
             configMapKeyRef:
               name: museumapp-config
               key: archivestore_host
+        - name: MESSAGEQUEUE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: museumapp-config
+              key: messagequeue_host
+        - name: MESSAGEQUEUE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: museumapp-config
+              key: messagequeue_port
+        - name: QUEUE_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: museumapp-config
+              key: queue_key
 ---
 apiVersion: v1
 kind: Service
@@ -152,7 +188,11 @@ metadata:
   labels:
     data: config
 data:
+  backend_host: "http://museumworker:3001"
   archivestore_host: "archivestore"
+  messagequeue_host: "messagequeue"
+  messagequeue_port: "6379"
+  queue_key: "archives:jobs"
 ---
 # ---------- Seed data (runs only when the Mongo volume is empty) ----------
 apiVersion: v1
@@ -208,8 +248,6 @@ spec:
         volumeMounts:
         - name: messagequeue-data
           mountPath: /data
-        - name: redis-config
-          mountPath: /usr/local/etc/redis/redis.conf
   volumeClaimTemplates:
     - metadata:
         name: messagequeue-data
@@ -218,11 +256,7 @@ spec:
         resources:
           requests:
             storage: 10Mi
-    - metadata:
-        name: redis-config
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests: 
-            storage: 5Mi
+  args:
+    - redis-server --appendonly yes
+
 ---

@@ -4,6 +4,14 @@ const port = process.env.PORT || 3000;
 const path = require('path');
 const server = require('http').createServer(app);
 const axios = require('axios');
+const redis = require('redis');
+const queueHost = process.env.MESSAGEQUEUE_HOST || 'messagequeue';
+const queuePort = process.env.MESSAGEQUEUE_PORT || 6379;
+const queueKey = process.env.QUEUE_KEY || 'archives:jobs';
+const queueClient = redis.createClient({ host: queueHost, port: queuePort });
+queueClient.on('error', (err) => {
+    console.error('Queue error:', err);
+});
 const urlBackend = process.env.URL_BACKEND || 'http://museumworker:3001'; 
 const io = require('socket.io')(server);
 const { io: ioClient } = require('socket.io-client');
@@ -55,11 +63,11 @@ app.get('/submitExhibit', (req, res) => {
 
 app.post('/submitExhibit', express.urlencoded({ extended: true }), (req, res) => {
     const { title, description, image } = req.body;
-    addCard(title, description, image);
+    addArchive(title, description, image);
     res.redirect('/specialExhibits');
 });
 
-async function addCard(title, description, image) { 
+async function addArchive(title, description, image) { 
     const newCard = {
         title: title,
         description: description,
@@ -67,18 +75,26 @@ async function addCard(title, description, image) {
     };
     sampleCards.push(newCard);
       let url = image || 'https://static.wikia.nocookie.net/megaman/images/b/bb/MM_X_Titanium-X.png/revision/latest?cb=20130302182543';
-        let cardTitle = title || '';
-        console.log('Adding Text', title);
-         console.log('Fetched text: ', url);
-            return await axios.post(urlBackend + '/addArchive', {
-                title: cardTitle,
+        let archiveTitle = title || '';
+        console.log('Adding Archive', title);
+         console.log('Fetched archive: ', url);
+            return queueClient.lpush(queueKey, JSON.stringify({
+                title: archiveTitle,
                 description: description,
-                content: url
+                contents: url
+            }), (err) => {
+                if (err) {
+                    console.error('Error adding archive to queue:', err);
+                } else {
+                    console.log('Archive added to queue:', archiveTitle);
+                }
             })
-            .then( () => socket.emit('archiveAdded', cardTitle) )
+            .then( () => workerSocket.emit('addArchive', { title: archiveTitle, description: description, image: url }) )
+            .then( () => console.log('Emitted addArchive event to backend worker.'))
+            .then( () => socket.emit('archiveAdded', archiveTitle) )
             .then(() => console.log('Archive added.'))
             .catch( (err) => {
-                console.log('Could not add text. Error', err);
+                console.log('Could not add archive. Error', err);
             });
 }
 
@@ -126,10 +142,10 @@ server.listen(port, () => {
 io.on('connection', (socket) => {
     console.log('A user connected',socket.id);
     socket.emit('message', 'Welcome to the Reploid Museum!');
-    socket.on('addCard', (data) => {
-        console.log('Received new card data:', data);
-        addCard(data.title, data.description, data.image);
-        io.emit('newCard', data);
+    socket.on('addArchive', (data) => {
+        console.log('Received new archive data:', data);
+        addArchive(data.title, data.description, data.image);
+        io.emit('newArchive', data);
     });
     socket.on('disconnect', () => {
         console.log('A user disconnected',socket.id);
