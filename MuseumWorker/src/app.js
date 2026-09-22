@@ -5,8 +5,13 @@ const server = require('http').createServer(app);
 const os = require('os');
 const redis = require('redis');
 const queueHost = process.env.MESSAGEQUEUE_HOST || 'messagequeue';
-const queuePort = process.env.MESSAGEQUEUE_PORT || 6379;
-
+const queueClient = redis.createClient({ url: `redis://${queueHost}:6379` });
+await queueClient.connect().then(() => {
+    console.log('Connected to Redis queue at', queueHost + ':6379');
+}).catch((err) => {
+    console.error('Could not connect to Redis queue at', queueHost + ':6379', 'Error:', err);
+});
+const queueKey = process.env.QUEUE_KEY || 'archives:jobs';
 const MAXTHREADS = process.env.MAXTHREADS || 10;
 const ArchiveManager = require('./cardsManager');
 app.use(express.json());
@@ -115,20 +120,22 @@ server.listen(port, () => {
     console.log('Server id:', os.hostname());
 });
 
-function startQueueWorker() {
-    const ArcManager = new ArchiveManager();
-    arcManager.connect().then( function loop(){
-        queueClient.brpop('archive:jobs', 0, (err, res) => {
-            if (!err && res) {
-                const job = JSON.parse(res[1]);
-                console.log('Received job:', job);
-                arcManager.addArchive(job.title, job.description, job.contents)
-                    .then( () => console.log('Archive added to database:', job.title))
-                    .catch( (err) => { console.error('Error adding archive to database:', err);})
-                    .finally( () => loop() );
-            } else loop();
-        });
-    });
+async function startQueueWorker() {
+    await queueClient.connect();
+    let archiveManager = new ArchiveManager();
+    await archiveManager.connect();
+    while (true) {
+        try {
+            const res = await queueClient.brPop(queueKey, 0);
+            const job = JSON.parse(res.element);
+            console.log('Received job:', job);
+            await archiveManager.addArchive(job.title, job.description, job.contents);
+            console.log('Archive added to database:', job.title);
+        } catch (err) {
+            console.error('Error processing job from queue:', err);
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+    }
 }
 
 startQueueWorker();

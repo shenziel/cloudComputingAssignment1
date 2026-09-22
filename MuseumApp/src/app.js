@@ -8,9 +8,14 @@ const redis = require('redis');
 const queueHost = process.env.MESSAGEQUEUE_HOST || 'messagequeue';
 const queuePort = process.env.MESSAGEQUEUE_PORT || 6379;
 const queueKey = process.env.QUEUE_KEY || 'archives:jobs';
-const queueClient = redis.createClient({ host: queueHost, port: queuePort });
+const queueClient = redis.createClient({ url: `redis://${queueHost}:${queuePort}` });
 queueClient.on('error', (err) => {
     console.error('Queue error:', err);
+});
+await queueClient.connect().then(() => {
+    console.log('Connected to Redis queue at', queueHost + ':' + queuePort);
+}).catch((err) => {
+    console.error('Could not connect to Redis queue at', queueHost + ':' + queuePort, 'Error:', err);
 });
 const urlBackend = process.env.URL_BACKEND || 'http://museumworker:3001'; 
 const io = require('socket.io')(server);
