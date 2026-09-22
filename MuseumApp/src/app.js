@@ -46,7 +46,9 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use('/css', express.static(path.join(__dirname, 'public/css')));
 
 app.get('/', (req, res) => {
-    res.render('index', { cards: firstCard });
+    return listArchivesTitle('DrCain').then(archives => {
+        res.render('index', { archives: archives });
+    });
 });
 
 app.get('/specialExhibits', (req, res) => {
@@ -56,7 +58,9 @@ app.get('/specialExhibits', (req, res) => {
 });
 
 app.get('/reploidBeginnings', (req, res) => {
-    res.render('reploidBeginnings', { cards: sampleCards2 });
+    return listArchivesTitle('X').then(archives => {
+        res.render('reploidBeginnings', { archives: archives });
+    });
 });
 
 app.get('/submitExhibit', (req, res) => {
@@ -105,7 +109,7 @@ function listArchives() {
         });
 }
 
-async function listArchives(listArchivesTitle) {
+function listArchivesTitle(listArchivesTitle) {
     return axios.get(urlBackend + '/listArchives/' + listArchivesTitle)
         .then( response => {
             console.log('Archives:', response.data);
