@@ -52,10 +52,6 @@ class ArchivesManager {
         return Archive.find({}).select('name description imageUrl -_id').exec();
     }
 
-    searchArchivesByTitle(title){
-        return Archive.find({name: title}).select('name description imageUrl -_id').exec();
-    }
-
     _runSearch(job, batch, searchStrategy) {
         return Promise.resolve(batch)
         .then( batch => {
