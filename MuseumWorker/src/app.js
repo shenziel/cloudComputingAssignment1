@@ -6,11 +6,6 @@ const os = require('os');
 const redis = require('redis');
 const queueHost = process.env.MESSAGEQUEUE_HOST || 'messagequeue';
 const queueClient = redis.createClient({ url: `redis://${queueHost}:6379` });
-await queueClient.connect().then(() => {
-    console.log('Connected to Redis queue at', queueHost + ':6379');
-}).catch((err) => {
-    console.error('Could not connect to Redis queue at', queueHost + ':6379', 'Error:', err);
-});
 const queueKey = process.env.QUEUE_KEY || 'archives:jobs';
 const MAXTHREADS = process.env.MAXTHREADS || 10;
 const ArchiveManager = require('./cardsManager');
@@ -138,4 +133,7 @@ async function startQueueWorker() {
     }
 }
 
-startQueueWorker();
+startQueueWorker().catch(e => {
+    console.error('Error starting queue worker:', e);
+    process.exit(1);
+});

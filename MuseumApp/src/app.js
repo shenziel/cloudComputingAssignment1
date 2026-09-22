@@ -12,7 +12,7 @@ const queueClient = redis.createClient({ url: `redis://${queueHost}:${queuePort}
 queueClient.on('error', (err) => {
     console.error('Queue error:', err);
 });
-await queueClient.connect().then(() => {
+queueClient.connect().then(() => {
     console.log('Connected to Redis queue at', queueHost + ':' + queuePort);
 }).catch((err) => {
     console.error('Could not connect to Redis queue at', queueHost + ':' + queuePort, 'Error:', err);
