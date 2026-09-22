@@ -78,29 +78,20 @@ async function addArchive(title, description, image) {
         description: description,
         image: image
     };
-    sampleCards.push(newCard);
-      let url = image || 'https://static.wikia.nocookie.net/megaman/images/b/bb/MM_X_Titanium-X.png/revision/latest?cb=20130302182543';
-        let archiveTitle = title || '';
-        console.log('Adding Archive', title);
-         console.log('Fetched archive: ', url);
-            return queueClient.lpush(queueKey, JSON.stringify({
-                title: archiveTitle,
-                description: description,
-                contents: url
-            }), (err) => {
-                if (err) {
-                    console.error('Error adding archive to queue:', err);
-                } else {
-                    console.log('Archive added to queue:', archiveTitle);
-                }
-            })
-            .then( () => workerSocket.emit('addArchive', { title: archiveTitle, description: description, image: url }) )
-            .then( () => console.log('Emitted addArchive event to backend worker.'))
-            .then( () => socket.emit('archiveAdded', archiveTitle) )
-            .then(() => console.log('Archive added.'))
-            .catch( (err) => {
-                console.log('Could not add archive. Error', err);
-            });
+    let url = image || 'https://static.wikia.nocookie.net/megaman/images/b/bb/MM_X_Titanium-X.png/revision/latest?cb=20130302182543';
+    let archiveTitle = title || '';
+    console.log('Adding Archive', title);
+    return queueClient.lPush(queueKey, JSON.stringify({
+            title: archiveTitle,
+            description: description,
+            contents: url
+        }))
+        .then( () => workerSocket.emit('addArchive', { title: archiveTitle, description: description, image: url }) )
+        .then( () => console.log('Emitted addArchive event to backend worker.'))
+        .then(() => console.log('Archive added.'))
+        .catch( (err) => {
+            console.log('Could not add archive. Error', err);
+        });
 }
 
 function listArchives() {
