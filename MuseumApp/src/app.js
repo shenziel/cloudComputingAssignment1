@@ -20,15 +20,6 @@ queueClient.connect().then(() => {
 const urlBackend = process.env.URL_BACKEND || 'http://museumworker:3001'; 
 const io = require('socket.io')(server);
 const { io: ioClient } = require('socket.io-client');
-const workerSocket = ioClient(urlBackend);
-
-workerSocket.on('connect', () => {
-    console.log('Connected to backend worker:', workerSocket.id);
-});
-
-workerSocket.on('disconnect', () => {
-    console.log('Disconnected from backend worker');
-});
 
 app.set('view engine', 'ejs');
 
